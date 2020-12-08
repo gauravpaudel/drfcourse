@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'hello',
     'calculator',
-    'employee'
+    'employee',
+    'polls'
 ]
 
 MIDDLEWARE = [
