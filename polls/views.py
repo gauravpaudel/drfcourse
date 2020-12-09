@@ -1,12 +1,16 @@
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics
+from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
 
 from .models import Poll, Choice
-from .serializers import PollSerializer,ChoiceSerializer, VoteSerializer
+from .serializers import PollSerializer,ChoiceSerializer, VoteSerializer, UserSerializer
 
+#APIView for customization
 class PollList(APIView):
     def get(self,request):
         polls = Poll.objects.all()[:20]
@@ -19,12 +23,18 @@ class PollDetail(APIView):
         data = PollSerializer(poll).data
         return Response(data)
 
+#generics for special operations
 class PollListG(generics.ListCreateAPIView):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
 
 
 class PollDetailG(generics.RetrieveDestroyAPIView):
+    queryset = Poll.objects.all()
+    serializer_class = PollSerializer
+
+#Viewset to use for same urls polls
+class PollViewSet(viewsets.ModelViewSet):
     queryset = Poll.objects.all()
     serializer_class = PollSerializer
 
@@ -36,7 +46,7 @@ class ChoiceList(generics.ListCreateAPIView):
     
     serializer_class = ChoiceSerializer
 
-class CreateVote(generics.CreateAPIView):
+class CreateVote(APIView):
     serializer_class = VoteSerializer
 
     def post(self,request,pk, choice_pk):
@@ -48,3 +58,8 @@ class CreateVote(generics.CreateAPIView):
             return Response(serializer.data,status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.data,status=status.HTTP_400_BAD_REQUEST)
+
+class UserCreate(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
